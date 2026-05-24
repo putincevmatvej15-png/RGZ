@@ -144,7 +144,7 @@ void trithemius_menu() {
             
             string encrypted = trithemius_encrypt(data);
             if (writeFile(outputFile, encrypted)) {
-                cout << "Файл зашифрован\n";
+                cout << "Файл является зашифрованным\n";
             }
             waitForKey();
         }
