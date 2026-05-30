@@ -7,6 +7,15 @@
 #include <vector>
 using namespace std;
 
+enum MenuChoice {
+    EXIT = 0,
+    ENCRYPT_TEXT_TO_FILE = 1,
+    DECRYPT_TEXT_FROM_FILE = 2,
+    DECRYPT_TEXT_FROM_HEX = 3,
+    ENCRYPT_FILE = 4,
+    DECRYPT_FILE = 5
+};
+
 void showMenu() {
     cout << "   XOR Шифр Гаммирование" << endl;
     cout << "  1. Шифровать текст результат в файл" << endl;
@@ -18,7 +27,7 @@ void showMenu() {
     cout << "Выберите действие: ";
 }
 
-// Преобразование HEX строки в байты
+//Преобразование HEX строки в байты
 vector<unsigned char> hexToBytes(const string& hex) {
     vector<unsigned char> bytes;
     stringstream ss(hex);
@@ -179,30 +188,29 @@ int main() {
     do {
         showMenu();
         cin >> choice;
-        
         switch (choice) {
-            case 1:
+            case ENCRYPT_TEXT_TO_FILE:
                 encryptTextToFile(cipher);
                 break;
-            case 2:
+            case DECRYPT_TEXT_FROM_FILE:
                 decryptTextFromFile(cipher);
                 break;
-            case 3:
+            case DECRYPT_TEXT_FROM_HEX:
                 decryptTextFromHex(cipher);
                 break;
-            case 4:
+            case ENCRYPT_FILE:
                 processFile(cipher, true);
                 break;
-            case 5:
+            case DECRYPT_FILE:
                 processFile(cipher, false);
                 break;
-            case 0:
+            case EXIT:
                 cout << "До свидания" << endl;
                 break;
             default:
                 cout << "Неверный выбор" << endl;
         }
-    } while (choice != 0);
+    } while (choice != EXIT);
     
     return 0;
 }
