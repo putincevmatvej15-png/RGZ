@@ -4,7 +4,12 @@
 #include <limits>
 #include <vector>
 #include <fstream>
+#include <sstream>
+
 using namespace std;
+
+// Функция преобразования HEX-строки в массив байт
+vector<unsigned char> hexToBytes(const string& hex);
 
 void showAffineMenu() {
     cout << "\n--- Аффинный шифр ---" << endl;
@@ -30,6 +35,7 @@ void affineEncryptText() {
     cout << "Введите ключ b (сдвиг, например 7): ";
     cin >> key_b;
     
+    // Проверка ключа 'a' на нечетность (должен быть взаимно прост с 256)
     if (key_a % 2 == 0) {
         key_a = key_a * 2 + 1;
     }
@@ -37,12 +43,9 @@ void affineEncryptText() {
     vector<uint8_t> data(text.begin(), text.end());
     ProcessData(data.data(), data.size(), key_a, key_b, true);
     
-    string result(data.begin(), data.end());
-    
-    cout << "\nЗашифрованный текст" << endl;
-    cout << "Текст: " << result << endl;
-    cout << "HEX: ";
-    for (unsigned char c : result) {
+    // Выводим результат в HEX, чтобы избежать проблем с непечатными символами в консоли
+    cout << "\nЗашифрованный текст (HEX формат): ";
+    for (unsigned char c : data) {
         printf("%02X ", c);
     }
     cout << endl;
@@ -51,11 +54,11 @@ void affineEncryptText() {
 void affineDecryptText() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     
-    string text;
+    string hexInput;
     int key_a, key_b;
     
-    cout << "\nВведите зашифрованный текст: ";
-    getline(cin, text);
+    cout << "\nВведите зашифрованный текст (HEX формат через пробел): ";
+    getline(cin, hexInput);
     
     cout << "Введите ключ a (тот же, что при шифровании): ";
     cin >> key_a;
@@ -66,12 +69,19 @@ void affineDecryptText() {
         key_a = key_a * 2 + 1;
     }
     
-    vector<uint8_t> data(text.begin(), text.end());
+    // Переводим HEX-строку обратно в байты для дешифрования
+    vector<uint8_t> data = hexToBytes(hexInput);
+    
+    if (data.empty()) {
+        cout << "\nОшибка: некорректный HEX-ввод или пустая строка!" << endl;
+        return;
+    }
+
     ProcessData(data.data(), data.size(), key_a, key_b, false);
     
     string result(data.begin(), data.end());
     
-    cout << "\nРасшифрованный текст" << endl;
+    cout << "\nРасшифрованный текст:" << endl;
     cout << result << endl;
 }
 
@@ -98,6 +108,7 @@ void affineEncryptFile() {
         return;
     }
     
+    // Чтение всего файла в вектор байт
     vector<uint8_t> data((istreambuf_iterator<char>(in)), istreambuf_iterator<char>());
     in.close();
     
