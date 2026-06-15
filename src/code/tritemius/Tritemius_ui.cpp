@@ -3,6 +3,9 @@
 #include <string>
 #include <limits>
 #include <iomanip>  
+#include <sstream>   
+#include <vector>    
+#include <cstdio>    
 using namespace std;
 
 void showTritemiusMenu() {
@@ -38,17 +41,44 @@ void tritemiusEncryptText(TritemiusCipher& cipher) {
 
 void tritemiusDecryptText(TritemiusCipher& cipher) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    string text;
-    cout << "\nВведите зашифрованный текст: ";
-    getline(cin, text);
     
-    if (text.empty()) {
+    string input;
+    cout << "\nВведите зашифрованный текст: ";
+    getline(cin, input);
+    
+    if (input.empty()) {
         cout << "Ошибка: текст не может быть пустым!" << endl;
         return;
     }
+    bool looksLikeHex = true;
+    for (char c : input) {
+        if (c == ' ') continue;
+        if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))) {
+            looksLikeHex = false;
+            break;
+        }
+    }
     
-    string result = cipher.decrypt(text);
-    cout << "\nРасшифрованные данные" << endl;
+    string textToDecrypt;
+    
+    if (looksLikeHex && input.find(' ') != string::npos) {
+        vector<uint8_t> bytes;
+        stringstream ss(input);
+        string byte;
+        while (ss >> byte) {
+            if (byte.length() == 2) {
+                bytes.push_back(static_cast<uint8_t>(stoi(byte, nullptr, 16)));
+            }
+        }
+        textToDecrypt = string(bytes.begin(), bytes.end());
+        cout << "(Распознано как HEX строка)" << endl;
+    } else {
+        textToDecrypt = input;
+    }
+    
+    string result = cipher.decrypt(textToDecrypt);
+    
+    cout << "\n=== РАСШИФРОВАННЫЕ ДАННЫЕ ===" << endl;
     cout << "Текст: " << result << endl;
 }
 

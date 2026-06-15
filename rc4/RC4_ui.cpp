@@ -1,14 +1,15 @@
-#include "vernam.h"
+#include "rc4.h"
 #include <iostream>
 #include <string>
 #include <limits>
-#include <iomanip>
-#include <sstream>   
 #include <vector>
+
 using namespace std;
 
-void showVernamMenu() {
-    cout << "\nВернам" << endl;
+vector<unsigned char> hexToBytes(const string& hex);
+
+void showRC4Menu() {
+    cout << "\n--- RC4 ---" << endl;
     cout << "  1. Шифровать текст" << endl;
     cout << "  2. Расшифровать текст" << endl;
     cout << "  3. Шифровать файл" << endl;
@@ -17,11 +18,14 @@ void showVernamMenu() {
     cout << "Выберите действие: ";
 }
 
-void vernamEncryptText(VernamCipher& cipher) {
+void rc4EncryptText(RC4Cipher& cipher) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
     string text, key;
+    
     cout << "\nВведите текст для шифрования: ";
     getline(cin, text);
+    
     cout << "Введите ключ (строка): ";
     getline(cin, key);
     
@@ -30,27 +34,23 @@ void vernamEncryptText(VernamCipher& cipher) {
         return;
     }
     
-    if (text.empty()) {
-        cout << "Ошибка: текст не может быть пустым" << endl;
-        return;
-    }
-    
     string result = cipher.encrypt(text, key);
-    cout << "\nЗашифрованные данные" << endl;
-    cout << "Текст: " << result << endl;
-    cout << "HEX: ";
-    cout << hex << setfill('0');
+    
+    // Вывод в HEX-виде, чтобы спецсимволы не ломали вывод в консоль
+    cout << "\nЗашифрованный текст (HEX формат): ";
     for (unsigned char c : result) {
-        cout << setw(2) << (int)c << " ";
+        printf("%02X ", c);
     }
-    cout << dec << endl;
+    cout << endl;
 }
 
-void vernamDecryptText(VernamCipher& cipher) {
+void rc4DecryptText(RC4Cipher& cipher) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    string input, key;
-    cout << "\nВведите зашифрованный текст: ";
-    getline(cin, input);
+    
+    string hexInput, key;
+    
+    cout << "\nВведите зашифрованный текст (HEX формат): ";
+    getline(cin, hexInput);
     
     cout << "Введите ключ (тот же, что при шифровании): ";
     getline(cin, key);
@@ -60,45 +60,30 @@ void vernamDecryptText(VernamCipher& cipher) {
         return;
     }
     
-    bool looksLikeHex = true;
-    for (char c : input) {
-        if (c == ' ') continue;
-        if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'))) {
-            looksLikeHex = false;
-            break;
-        }
+    vector<unsigned char> cipherBytes = hexToBytes(hexInput);
+    if (cipherBytes.empty()) {
+        cout << "Ошибка: пустой или некорректный HEX-ввод!" << endl;
+        return;
     }
     
-    string textToDecrypt;
+    string cipherText(cipherBytes.begin(), cipherBytes.end());
+    string result = cipher.decrypt(cipherText, key);
     
-    if (looksLikeHex && input.find(' ') != string::npos) {
-        vector<uint8_t> bytes;
-        stringstream ss(input);
-        string byte;
-        while (ss >> byte) {
-            if (byte.length() == 2) {
-                bytes.push_back(static_cast<uint8_t>(stoi(byte, nullptr, 16)));
-            }
-        }
-        textToDecrypt = string(bytes.begin(), bytes.end());
-        cout << "(Распознано как HEX строка)" << endl;
-    } else {
-        textToDecrypt = input;
-    }
-    
-    string result = cipher.decrypt(textToDecrypt, key);
-    
-    cout << "\n=== РАСШИФРОВАННЫЕ ДАННЫЕ ===" << endl;
-    cout << "Текст: " << result << endl;
+    cout << "\nРасшифрованный текст:" << endl;
+    cout << result << endl;
 }
 
-void vernamEncryptFile(VernamCipher& cipher) {
+void rc4EncryptFile(RC4Cipher& cipher) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
     string inputFile, outputFile, key;
+    
     cout << "\nВведите путь к файлу для шифрования: ";
     getline(cin, inputFile);
+    
     cout << "Введите путь для сохранения результата: ";
     getline(cin, outputFile);
+    
     cout << "Введите ключ (строка): ";
     getline(cin, key);
     
@@ -109,15 +94,20 @@ void vernamEncryptFile(VernamCipher& cipher) {
     }
 }
 
-void vernamDecryptFile(VernamCipher& cipher) {
+void rc4DecryptFile(RC4Cipher& cipher) {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
     string inputFile, outputFile, key;
+    
     cout << "\nВведите путь к зашифрованному файлу: ";
     getline(cin, inputFile);
+    
     cout << "Введите путь для сохранения результата: ";
     getline(cin, outputFile);
+    
     cout << "Введите ключ (тот же, что при шифровании): ";
     getline(cin, key);
+    
     if (cipher.decryptFile(inputFile, outputFile, key)) {
         cout << "Файл расшифрован: " << outputFile << endl;
     } else {
