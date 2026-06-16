@@ -1,26 +1,23 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -O2 -std=c++17
 
-SRC_DIR = src
-CODE_DIR = src/code
+# Все .cpp файлы (в текущей папке и в code/)
+SRCS = $(wildcard *.cpp) $(shell find code -name "*.cpp")
 
-# Все .cpp файлы
-SRCS = $(wildcard $(SRC_DIR)/*.cpp) $(shell find $(CODE_DIR) -name "*.cpp")
+# Папки с заголовками
+INCLUDES = -I. $(addprefix -I, $(shell find code -type d))
 
-# Автоматически найти все папки с заголовками
-INCLUDE_DIRS = $(shell find $(CODE_DIR) -type d)
-INCLUDES = $(addprefix -I,$(INCLUDE_DIRS)) -I$(SRC_DIR)
-
-TARGET = bin/program
+# Исполняемый файл (в bin/ на уровень выше)
+TARGET = ../bin/program
 
 all:
-	@mkdir -p bin
+	mkdir -p ../bin
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRCS) -o $(TARGET)
 
 run: all
-	./$(TARGET)
+	../$(TARGET)
 
 clean:
-	rm -rf bin
+	rm -rf ../bin
 
 .PHONY: all run clean
