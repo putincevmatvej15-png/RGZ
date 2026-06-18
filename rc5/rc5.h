@@ -15,12 +15,12 @@ private:
     void encryptBlock(uint32_t& A, uint32_t& B);
     void decryptBlock(uint32_t& A, uint32_t& B);
     
-    // Подготовка данных (добавление заголовка длины и padding до 8 байт)
+    // Подготовка данных
     std::vector<uint8_t> prepareData(const std::vector<uint8_t>& data);
 
     // Таблица раундовых ключей
     std::vector<uint32_t> S;
-    int rounds = 12; // Количество раундов (r = 12)
+    int rounds = 12;
     uint32_t P32 = 0xB7E15163;
     uint32_t Q32 = 0x9E3779B9;
 
@@ -33,7 +33,7 @@ public:
     bool encryptFile(const std::string& inputFile, const std::string& outputFile, const std::string& key);
     bool decryptFile(const std::string& inputFile, const std::string& outputFile, const std::string& key);
     
-    // Проверка ключа (от 1 до 255 байт)
+    // Проверка ключа
     bool isValidKey(const std::string& key);
 };
-#endif // RC5_H
+#endif

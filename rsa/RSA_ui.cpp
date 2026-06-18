@@ -54,7 +54,7 @@ int64_t ModInverse(int64_t a, int64_t m) {
     int64_t x, y;
     int64_t gcd = ExtendedGCD(a, m, x, y);
     if (gcd != 1) {
-        return -1; // Инверсии не существует
+        return -1;
     }
     return (x % m + m) % m;
 }
@@ -79,10 +79,10 @@ bool generateRSAKeys(uint32_t p, uint32_t q, uint32_t& e, uint32_t& d, uint32_t&
     n = p * q;
     uint64_t phi = (uint64_t)(p - 1) * (q - 1);
     
-    // Выбор e (должно быть взаимно просто с phi)
-    e = 65537; // Стандартное значение
+    // Выбор e
+    e = 65537;
     if (e >= phi) {
-        e = 3; // Если phi слишком маленький
+        e = 3;
     }
     
     while (GCD(e, phi) != 1) {
