@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <cstring>
 #include <cmath>
+#include <random> 
+#include <chrono> 
 
 using namespace std;
 
@@ -33,6 +35,19 @@ bool isPrime(uint32_t n) {
         if (n % i == 0 || n % (i + 2) == 0) return false;
     }
     return true;
+}
+
+// Генератор случайного простого числа
+uint32_t generatePrime(uint32_t min_val, uint32_t max_val) {
+    static mt19937 gen(chrono::steady_clock::now().time_since_epoch().count());
+    uniform_int_distribution<uint32_t> dist(min_val, max_val);
+    
+    while (true) {
+        uint32_t num = dist(gen);
+        if (isPrime(num)) {
+            return num;
+        }
+    }
 }
 
 // Расширенный алгоритм Евклида для поиска НОД и коэффициентов
@@ -118,16 +133,18 @@ void rsaEncryptText() {
     cout << "\nВведите текст для шифрования: ";
     getline(cin, text);
     
-    cout << "Введите простое число p (например, 61): ";
-    cin >> p;
-    cout << "Введите простое число q (например, 53): ";
-    cin >> q;
+    p = generatePrime(100, 250);
+    q = generatePrime(251, 500);
     
     if (!generateRSAKeys(p, q, e, d, n)) {
         return;
     }
     
-    cout << "Сгенерированные ключи:" << endl;
+    cout << "\n[Автогенерация] Сгенерированы простые числа:" << endl;
+    cout << "  p = " << p << endl;
+    cout << "  q = " << q << endl;
+    
+    cout << "\nСгенерированные ключи:" << endl;
     cout << "  n = " << n << endl;
     cout << "  e = " << e << " (открытый ключ)" << endl;
     cout << "  d = " << d << " (закрытый ключ)" << endl;
@@ -142,7 +159,7 @@ void rsaEncryptText() {
         cout << hex << setw(4) << setfill('0') << uppercase << c << " ";
     }
     cout << dec << endl;
-    cout << "\nСохраните значения p=" << p << " и q=" << q << " для расшифрования!" << endl;
+    cout << "\nВАЖНО: Сохраните значения p=" << p << " и q=" << q << " для последующего расшифрования!" << endl;
 }
 
 void rsaDecryptText() {
@@ -153,7 +170,7 @@ void rsaDecryptText() {
     cout << "\nВведите зашифрованный текст (HEX формат через пробел): ";
     getline(cin, hexInput);
     
-    cout << "Введите простое число p (которое использовалось при шифровании): ";
+    cout << "Введите простое число p (которое было сгенерировано при шифровании): ";
     cin >> p;
     cout << "Введите простое число q: ";
     cin >> q;
@@ -185,17 +202,19 @@ void rsaEncryptFile() {
     getline(cin, inputFile);
     cout << "Введите путь для сохранения результата: ";
     getline(cin, outputFile);
-    
-    cout << "Введите простое число p (например, 61): ";
-    cin >> p;
-    cout << "Введите простое число q (например, 53): ";
-    cin >> q;
+
+    p = generatePrime(100, 250);
+    q = generatePrime(251, 500);
     
     if (!generateRSAKeys(p, q, e, d, n)) {
         return;
     }
     
-    cout << "Сгенерированные ключи:" << endl;
+    cout << "\n[Автогенерация] Сгенерированы простые числа:" << endl;
+    cout << "  p = " << p << endl;
+    cout << "  q = " << q << endl;
+    
+    cout << "\nСгенерированные ключи:" << endl;
     cout << "  n = " << n << endl;
     cout << "  e = " << e << " (открытый ключ)" << endl;
     cout << "  d = " << d << " (закрытый ключ)" << endl;
@@ -217,7 +236,7 @@ void rsaEncryptFile() {
     out.close();
     
     cout << "Файл зашифрован. Результат: " << outputFile << endl;
-    cout << "Сохраните значения p=" << p << " и q=" << q << " для расшифрования!" << endl;
+    cout << "ВАЖНО: Сохраните значения p=" << p << " и q=" << q << " для последующего расшифрования!" << endl;
 }
 
 void rsaDecryptFile() {
@@ -230,7 +249,7 @@ void rsaDecryptFile() {
     cout << "Введите путь для сохранения результата: ";
     getline(cin, outputFile);
     
-    cout << "Введите простое число p (которое использовалось при шифровании): ";
+    cout << "Введите простое число p (которое было сгенерировано при шифровании): ";
     cin >> p;
     cout << "Введите простое число q: ";
     cin >> q;
