@@ -6,54 +6,59 @@
 #include <cstdint>
 using namespace std;
 
-//заголовки шифров
+// заголовки шифров
 #include "xor.h"
 #include "railfence.h"
 #include "affine.h"
 #include "tritemius.h"
 #include "rc4.h"
+#include "rc5.h"
 #include "vernam.h"
+#include "rsa.h"
 
-//функциии шифрования/дешифр
-
+// функции шифрования/дешифр
 void showXORMenu();
 void xorEncryptText(XORCipher&);
 void xorDecryptText(XORCipher&);
 void xorEncryptFile(XORCipher&);
 void xorDecryptFile(XORCipher&);
-
 void showRailMenu();
 void railEncryptText(RailFenceCipher&);
 void railDecryptText(RailFenceCipher&);
 void railEncryptFile(RailFenceCipher&);
 void railDecryptFile(RailFenceCipher&);
-
 void showAffineMenu();
 void affineEncryptText();
 void affineDecryptText();
 void affineEncryptFile();
 void affineDecryptFile();
-
 void showTritemiusMenu();
 void tritemiusEncryptText(TritemiusCipher&);
 void tritemiusDecryptText(TritemiusCipher&);
 void tritemiusEncryptFile(TritemiusCipher&);
 void tritemiusDecryptFile(TritemiusCipher&);
-
 void showRC4Menu();
 void rc4EncryptText(RC4Cipher&);
 void rc4DecryptText(RC4Cipher&);
 void rc4EncryptFile(RC4Cipher&);
 void rc4DecryptFile(RC4Cipher&);
-
+void showRC5Menu();
+void rc5EncryptText(RC5Cipher&);
+void rc5DecryptText(RC5Cipher&);
+void rc5EncryptFile(RC5Cipher&);
+void rc5DecryptFile(RC5Cipher&);
 void showVernamMenu();
 void vernamEncryptText(VernamCipher&);
 void vernamDecryptText(VernamCipher&);
 void vernamEncryptFile(VernamCipher&);
 void vernamDecryptFile(VernamCipher&);
+void showRSAMenu();
+void rsaEncryptText();
+void rsaDecryptText();
+void rsaEncryptFile();
+void rsaDecryptFile();
 
 //Hex
-
 vector<unsigned char> hexToBytes(const string& hex) {
     vector<unsigned char> bytes;
     stringstream ss(hex);
@@ -65,23 +70,19 @@ vector<unsigned char> hexToBytes(const string& hex) {
     }
     return bytes;
 }
-
 string bytesToString(const vector<unsigned char>& bytes) {
     return string(bytes.begin(), bytes.end());
 }
 
 //Логин
-
 bool login() {
     string password;
     const string CORRECT_PASSWORD = "rgr";
-    
     cout << "========================================" << endl;
     cout << "Добро пожаловать в программу!" << endl;
     cout << "========================================" << endl;
     cout << "Введите пароль: ";
     cin >> password;
-    
     if (password == CORRECT_PASSWORD) {
         cout << "\nВы вошли!" << endl;
         return true;
@@ -91,10 +92,9 @@ bool login() {
 }
 
 //Enum classs
-
 enum class MainMenu : int {
     EXIT = 0, XOR = 1, RAIL_FENCE = 2, AFFINE = 3,
-    TRITEMIUS = 4, RC4 = 5, VERNAM = 6
+    TRITEMIUS = 4, RC4 = 5, RC5 = 6, VERNAM = 7, RSA = 8
 };
 enum class CipherAction : int {
     EXIT = 0, ENCRYPT_TEXT = 1, DECRYPT_TEXT = 2,
@@ -102,7 +102,6 @@ enum class CipherAction : int {
 };
 
 //Основное меню
-
 void showMainMenu() {
     cout << "\n========================================" << endl;
     cout << "Программа для шифр/дешифр" << endl;
@@ -113,7 +112,9 @@ void showMainMenu() {
     cout << "  " << static_cast<int>(MainMenu::AFFINE) << ". Аффинный шифр" << endl;
     cout << "  " << static_cast<int>(MainMenu::TRITEMIUS) << ". Шифр Тритемиуса" << endl;
     cout << "  " << static_cast<int>(MainMenu::RC4) << ". RC4" << endl;
+    cout << "  " << static_cast<int>(MainMenu::RC5) << ". RC5" << endl;
     cout << "  " << static_cast<int>(MainMenu::VERNAM) << ". Вернам" << endl;
+    cout << "  " << static_cast<int>(MainMenu::RSA) << ". RSA" << endl;
     cout << "  " << static_cast<int>(MainMenu::EXIT) << ". Выход" << endl;
 }
 
@@ -121,112 +122,129 @@ int main() {
     if (!login()) {
         return 1;
     }
-    
     XORCipher xorCipher;
     RailFenceCipher railCipher;
     TritemiusCipher tritemiusCipher;
     RC4Cipher rc4Cipher;
+    RC5Cipher rc5Cipher;
     VernamCipher vernamCipher;
-    
+
     int cipherChoiceInt, actionChoiceInt;
-    
     do {
         showMainMenu();
         cin >> cipherChoiceInt;
         MainMenu cipherChoice = static_cast<MainMenu>(cipherChoiceInt);
-        
         if (cipherChoice == MainMenu::EXIT) {
             break;
         }
-        
         if (cipherChoice == MainMenu::XOR) {
             do {
-                showXORMenu();
-                cin >> actionChoiceInt;
+                showXORMenu(); cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: xorEncryptText(xorCipher); break;
-                    case CipherAction::DECRYPT_TEXT: xorDecryptText(xorCipher); break;
-                    case CipherAction::ENCRYPT_FILE: xorEncryptFile(xorCipher); break;
-                    case CipherAction::DECRYPT_FILE: xorDecryptFile(xorCipher); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: xorEncryptText(xorCipher); break;
+                case CipherAction::DECRYPT_TEXT: xorDecryptText(xorCipher); break;
+                case CipherAction::ENCRYPT_FILE: xorEncryptFile(xorCipher); break;
+                case CipherAction::DECRYPT_FILE: xorDecryptFile(xorCipher); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else if (cipherChoice == MainMenu::RAIL_FENCE) {
             do {
-                showRailMenu();
-                cin >> actionChoiceInt;
+                showRailMenu(); cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: railEncryptText(railCipher); break;
-                    case CipherAction::DECRYPT_TEXT: railDecryptText(railCipher); break;
-                    case CipherAction::ENCRYPT_FILE: railEncryptFile(railCipher); break;
-                    case CipherAction::DECRYPT_FILE: railDecryptFile(railCipher); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: railEncryptText(railCipher); break;
+                case CipherAction::DECRYPT_TEXT: railDecryptText(railCipher); break;
+                case CipherAction::ENCRYPT_FILE: railEncryptFile(railCipher); break;
+                case CipherAction::DECRYPT_FILE: railDecryptFile(railCipher); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else if (cipherChoice == MainMenu::AFFINE) {
             do {
-                showAffineMenu();
-                cin >> actionChoiceInt;
+                showAffineMenu(); cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: affineEncryptText(); break;
-                    case CipherAction::DECRYPT_TEXT: affineDecryptText(); break;
-                    case CipherAction::ENCRYPT_FILE: affineEncryptFile(); break;
-                    case CipherAction::DECRYPT_FILE: affineDecryptFile(); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: affineEncryptText(); break;
+                case CipherAction::DECRYPT_TEXT: affineDecryptText(); break;
+                case CipherAction::ENCRYPT_FILE: affineEncryptFile(); break;
+                case CipherAction::DECRYPT_FILE: affineDecryptFile(); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else if (cipherChoice == MainMenu::TRITEMIUS) {
             do {
-                showTritemiusMenu();
-                cin >> actionChoiceInt;
+                showTritemiusMenu(); cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: tritemiusEncryptText(tritemiusCipher); break;
-                    case CipherAction::DECRYPT_TEXT: tritemiusDecryptText(tritemiusCipher); break;
-                    case CipherAction::ENCRYPT_FILE: tritemiusEncryptFile(tritemiusCipher); break;
-                    case CipherAction::DECRYPT_FILE: tritemiusDecryptFile(tritemiusCipher); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: tritemiusEncryptText(tritemiusCipher); break;
+                case CipherAction::DECRYPT_TEXT: tritemiusDecryptText(tritemiusCipher); break;
+                case CipherAction::ENCRYPT_FILE: tritemiusEncryptFile(tritemiusCipher); break;
+                case CipherAction::DECRYPT_FILE: tritemiusDecryptFile(tritemiusCipher); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else if (cipherChoice == MainMenu::RC4) {
             do {
-                showRC4Menu();
-                cin >> actionChoiceInt;
+                showRC4Menu(); cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: rc4EncryptText(rc4Cipher); break;
-                    case CipherAction::DECRYPT_TEXT: rc4DecryptText(rc4Cipher); break;
-                    case CipherAction::ENCRYPT_FILE: rc4EncryptFile(rc4Cipher); break;
-                    case CipherAction::DECRYPT_FILE: rc4DecryptFile(rc4Cipher); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: rc4EncryptText(rc4Cipher); break;
+                case CipherAction::DECRYPT_TEXT: rc4DecryptText(rc4Cipher); break;
+                case CipherAction::ENCRYPT_FILE: rc4EncryptFile(rc4Cipher); break;
+                case CipherAction::DECRYPT_FILE: rc4DecryptFile(rc4Cipher); break;
+                default: break;
+                }
+            } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
+        }
+        else if (cipherChoice == MainMenu::RC5) {
+            do {
+                showRC5Menu(); cin >> actionChoiceInt;
+                CipherAction action = static_cast<CipherAction>(actionChoiceInt);
+                switch (action) {
+                case CipherAction::ENCRYPT_TEXT: rc5EncryptText(rc5Cipher); break;
+                case CipherAction::DECRYPT_TEXT: rc5DecryptText(rc5Cipher); break;
+                case CipherAction::ENCRYPT_FILE: rc5EncryptFile(rc5Cipher); break;
+                case CipherAction::DECRYPT_FILE: rc5DecryptFile(rc5Cipher); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else if (cipherChoice == MainMenu::VERNAM) {
             do {
-                showVernamMenu();
+                showVernamMenu(); cin >> actionChoiceInt;
+                CipherAction action = static_cast<CipherAction>(actionChoiceInt);
+                switch (action) {
+                case CipherAction::ENCRYPT_TEXT: vernamEncryptText(vernamCipher); break;
+                case CipherAction::DECRYPT_TEXT: vernamDecryptText(vernamCipher); break;
+                case CipherAction::ENCRYPT_FILE: vernamEncryptFile(vernamCipher); break;
+                case CipherAction::DECRYPT_FILE: vernamDecryptFile(vernamCipher); break;
+                default: break;
+                }
+            } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
+        }
+        else if (cipherChoice == MainMenu::RSA) {
+            do {
+                showRSAMenu();
                 cin >> actionChoiceInt;
                 CipherAction action = static_cast<CipherAction>(actionChoiceInt);
                 switch (action) {
-                    case CipherAction::ENCRYPT_TEXT: vernamEncryptText(vernamCipher); break;
-                    case CipherAction::DECRYPT_TEXT: vernamDecryptText(vernamCipher); break;
-                    case CipherAction::ENCRYPT_FILE: vernamEncryptFile(vernamCipher); break;
-                    case CipherAction::DECRYPT_FILE: vernamDecryptFile(vernamCipher); break;
-                    default: break;
+                case CipherAction::ENCRYPT_TEXT: rsaEncryptText(); break;
+                case CipherAction::DECRYPT_TEXT: rsaDecryptText(); break;
+                case CipherAction::ENCRYPT_FILE: rsaEncryptFile(); break;
+                case CipherAction::DECRYPT_FILE: rsaDecryptFile(); break;
+                default: break;
                 }
             } while (actionChoiceInt != static_cast<int>(CipherAction::EXIT));
         }
         else {
             cout << "Неверный выбор" << endl;
         }
-        
     } while (true);
     
     cout << "\nДо встречи!" << endl;
